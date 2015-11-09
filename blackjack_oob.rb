@@ -1,3 +1,5 @@
+require 'pry'
+
 def show_winner(hand_one, hand_two)
   if hand_one.hand_owner == 'Dealer'
     dealer_total = hand_one.get_total
@@ -41,10 +43,11 @@ class CardHand
 
   def show_hand
     print "#{hand_owner} has "
-    cards.each do |card|
-      print "#{card.suit} #{card.value}, "
+    cards.each_with_index do |card,index|
+      print card 
+      index == cards.length - 1 ? (print " ") : (print " ,")
     end
-    puts " with a total of #{get_total}."
+    puts "with a total of #{get_total}."
   end
 
   def get_total
@@ -75,7 +78,8 @@ class Deck
 
   def initialize
     @cards = []
-    ['H', 'D', 'S', 'C'].product(['2','3','4','5','6','7','8','9','10','J','Q','K','A']).each do |suit_value_array|
+    card_values = %w[H D S C].product(%w[2 3 4 5 6 7 8 9 10 J Q K A])
+    card_values.each do |suit_value_array|
       @cards << Card.new(suit_value_array[0],suit_value_array[1])
     end
     @cards.shuffle!
@@ -93,6 +97,10 @@ class Card
     @suit = s
     @value = v
   end
+
+  def to_s
+    "#{suit} #{value}"
+  end
 end
 
 puts "-----------Let's play BlackJack!--------------"
@@ -109,7 +117,6 @@ begin
     deck.deal(player_hand)
     deck.deal(dealer_hand)
   end
-
   player_hand.show_hand
   dealer_hand.show_hand
 
@@ -133,9 +140,9 @@ begin
 
 
   dealer_hand.show_hand
-  unless player_hand.get_total > 21 || 
-    (player_hand.get_total == 21 && dealer_hand.get_total >= 17)
-    until dealer_hand.get_total >= 17
+    
+    until dealer_hand.get_total >= 17 || player_hand.get_total > 21 
+      || (player_hand.get_total == 21 && dealer_hand.get_total >= 17)
       puts "Dealer draws. . ."
       deck.deal(dealer_hand)
       dealer_hand.show_hand
