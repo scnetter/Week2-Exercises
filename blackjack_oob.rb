@@ -1,11 +1,9 @@
-require 'pry'
-
 class BlackJack
   attr_accessor :deck, :player_hand, :dealer_hand
 
-  def initialize(number_of_decks,player_name)
-    @deck = Deck.new(number_of_decks)
-    @player_hand = CardHand.new(player_name)
+  def initialize
+    @deck = []
+    @player_hand = []
     @dealer_hand = CardHand.new("Dealer")
   end
 
@@ -46,21 +44,25 @@ class BlackJack
     self.deck = Deck.new(number_of_decks)
   end
 
-  def clear_hands
-    self.player_hand.cards = []
-    self.dealer_hand.cards = []
-  end
-
-  def run_game
+  def run
+    system('clear')
+    puts "-----------Let's play BlackJack!--------------"
+    puts "What's your name?"
+    player_name = gets.chomp
+    puts "How many decks do you want to play with?"
+    number_of_decks = gets.chomp
+    self.deck = Deck.new(number_of_decks)
+    self.player_hand = CardHand.new(player_name)
     begin
+      system('clear')
       if deck.cards.length < (deck.number_of_decks.to_i * 52) / 2 
         print "Generating new deck. . ."
         self.deck = Deck.new(number_of_decks)
       end
 
       2.times do
-        self.player_hand.cards << deck.deal
-        self.dealer_hand.cards << deck.deal
+        self.player_hand.hand_cards << deck.deal
+        self.dealer_hand.hand_cards << deck.deal
       end
 
       player_hand.show_hand
@@ -74,7 +76,7 @@ class BlackJack
           puts 'You must enter 1) to Hit or 2) to Stay'
           next
         elsif hit_or_stay == '1'
-          player_hand.cards << deck.deal
+          player_hand.take_card(deck.deal)
           player_hand.show_hand
           player_hand.get_total >= 21 ? break : next
         else
@@ -88,37 +90,45 @@ class BlackJack
       until dealer_hand.get_total >= 17 || player_hand.get_total > 21 || 
         (player_hand.get_total == 21 && dealer_hand.get_total >= 17)
         puts "Dealer draws. . ."
-        self.dealer_hand.cards << deck.deal
+        self.dealer_hand.take_card(deck.deal)
         dealer_hand.show_hand
       end
       show_winner(dealer_hand,player_hand)
-      clear_hands
+      player_hand.clear_hand
+      dealer_hand.clear_hand
       puts "Do you want to play again? [Y/N]:"
     end until gets.chomp.downcase != 'y'
   end
 end
 
 class CardHand
-  attr_accessor :hand_owner, :cards
+  attr_accessor :hand_owner, :hand_cards
 
   def initialize(hand_owner)
-    @cards = []
+    @hand_cards = []
     @hand_owner = hand_owner
   end
 
   def show_hand
-    print "#{hand_owner} has "
-    cards.each_with_index do |card,index|
-      print card 
-      index == cards.length - 1 ? (print " ") : (print " ,")
+    puts "#{hand_owner} has:"
+    hand_cards.each_with_index do |card,index|
+      puts card 
     end
-    puts "with a total of #{get_total}."
+    puts "Hand total is #{get_total}."
+  end
+
+  def clear_hand
+    self.hand_cards = []
+  end
+
+  def take_card(card)
+    self.hand_cards << card
   end
 
   def get_total
     total = 0
     aces = 0
-    cards.each do |card| 
+    hand_cards.each do |card| 
       if /[1-9]/.match(card.value)
         total += card.value.to_i 
       elsif /[JKQ]/.match(card.value)
@@ -167,17 +177,51 @@ class Card
   end
 
   def to_s
-    "#{suit} #{value}"
+    "The #{find_value} of #{find_suit}."
+  end
+
+  def find_suit
+    case suit
+    when 'H' then "\u2661 Hearts"
+    when 'D' then "\u2662 Diamonds"
+    when 'S' then "\u2664 Spades"
+    when 'C' then "\u2667 Clubs"
+    end
+  end
+
+  def find_value
+    case value
+    when 'K' then 'King'
+    when 'Q' then 'Queen'
+    when 'J' then 'Jack'
+    when 'A' then 'Ace'
+    else value
+    end
   end
 end
 
-puts "-----------Let's play BlackJack!--------------"
-puts "What's your name?"
-player_name = gets.chomp
-puts "How many decks do you want to play with?"
-number_of_decks = gets.chomp
-current_game = BlackJack.new(number_of_decks,player_name)
-current_game.run_game
+class Player
+  def initialize(name)
+    @name = name
+    @money = 10
+    @hand = CardHand.new
+    @current_bet = 0
+  end
+
+  def bet(money)
+    self.current_bet = money
+  end
+
+  def settle_bet
+
+  end
+
+
+end
+
+
+
+BlackJack.new.run
 
 
 
