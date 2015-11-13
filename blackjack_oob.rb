@@ -112,7 +112,7 @@ class CardHand
   def is_busted?
     get_total > 21
   end
-
+  
   def show_hand
     puts "#{hand_owner} has:"
     hand_cards.each_with_index do |card,index|
@@ -132,17 +132,17 @@ class CardHand
   def get_total
     total = 0
     aces = 0
-    face_values = hand_cards.map do { |card| card.value }
+    face_values = hand_cards.map { |card| card.value }
 
     face_values.each do |value|
       if /A/.match(value)
         total += 11
       else
-        total = (value.to_i == 0 ? 10 : value.to_i)
+        total += (value.to_i == 0 ? 10 : value.to_i)
       end
     end
 
-    for face_values.select { |value| value == "A"}.count.times do
+    face_values.select { |value| value == "A"}.count.times do
       break if total <=21
       total -= 10
     end
