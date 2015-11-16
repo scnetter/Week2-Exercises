@@ -29,7 +29,7 @@ class CardHand
     puts "=> #{hand_cards[1]} is showing..."
   end
 
-  def clear_hand
+  def clear
     self.hand_cards = []
   end
 
@@ -147,7 +147,6 @@ class BlackJack
     else
       puts "Player wins with #{player_total}. Dealer with #{dealer_total}"
     end
-    play_again?
   end
 
   def renew_deck
@@ -218,8 +217,8 @@ class BlackJack
   def play_again?
     puts "Do you want to play again? [Y/N]:"
     if gets.chomp.downcase == 'y'
-      player_hand.clear_hand
-      dealer_hand.clear_hand
+      player_hand.clear
+      dealer_hand.clear
       if deck.cards.length < (deck.number_of_decks.to_i * 52) / 2 
         print "Generating new deck. . ."
         self.deck = Deck.new(number_of_decks)
@@ -232,15 +231,16 @@ class BlackJack
   end
 
   def run
-  if deck.nil?
-    create_player_hand
-    get_deck_num_and_create 
-  end
+    if deck.nil?
+      create_player_hand
+      get_deck_num_and_create 
+    end
     deal_cards
     show_flop
     player_turn
     dealer_turn
     show_winner 
+    play_again?
   end
 end
 
